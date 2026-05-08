@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "module": "esnext",
-    "target": "es2021",
-    "checkJs": true,
+    "target": "esnext",
+    "checkJs": false,
     "types": ["jest", "node"]
   },
   "exclude": ["node_modules"]

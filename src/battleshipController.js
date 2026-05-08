@@ -6,6 +6,7 @@ import {
   UpdateCells,
   viewPlayerTurn,
   viewEndgame,
+  bindPlacementListener,
 } from './battleshipView';
 
 class GameController {
@@ -17,6 +18,8 @@ class GameController {
 
   #gameState = 'PLACING';
 
+  #shipsToPlace = [5, 4, 3, 3, 2];
+
   createPlayers(playerName, opponentName, opponentType) {
     this.#player = new Player(playerName, 'player');
     this.#opponent = new Player(opponentName, opponentType);
@@ -25,23 +28,40 @@ class GameController {
 
   startGame(playerName, opponentName, opponentType) {
     this.createPlayers(playerName, opponentName, opponentType);
-    this.setupGame();
     viewPlayerTurn(this.#activePlayer);
     ViewCells();
     bindAttackListener(this.playRound.bind(this));
+
+    bindPlacementListener(this.handlePlacement.bind(this));
   }
 
-  setupGame() {
-    const playerBoard = this.#player.board;
-    const opponentBoard = this.#opponent.board;
-    const ship = new Ship(3);
-    const ship2 = new Ship(3);
+  handlePlacement(X, Y) {
+    if (this.#gameState !== 'PLACING') return;
 
-    playerBoard.addShip(5, 5, ship, false);
-    opponentBoard.addShip(5, 5, ship2, false);
+    const currentShipLength = this.#shipsToPlace[0];
+    const ship = new Ship(currentShipLength);
+
+    // Try to place it (defaulting to horizontal for now)
+    const success = this.#player.board.addShip(X, Y, ship, false);
+
+    if (success) {
+      // Remove that ship from the to-do list
+      this.#shipsToPlace.shift();
+
+      // Update the screen!
+      UpdateCells(this.#player.board.board, this.#opponent.board.board);
+
+      // If the list is empty, start the game!
+      if (this.#shipsToPlace.length === 0) {
+        this.#gameState = 'PLAYING';
+        console.log('All ships placed! Let the battle begin!');
+      }
+    }
   }
 
   playRound(X, Y, user) {
+    if (this.#gameState === 'PLACING') return;
+
     if (this.#activePlayer === this.#player) {
       if (user === 'p1') {
         return;

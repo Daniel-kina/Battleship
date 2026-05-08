@@ -49,6 +49,15 @@ function UpdateCells(playerBoard, opponentBoard) {
         );
 
         cell.classList.add('miss');
+      } else if (
+        typeof playerBoard[i][j] === 'object' &&
+        playerBoard[i][j] !== null
+      ) {
+        // ✅ NEW: If it's a ship object, color it blue!
+        const cell = playerBoardElem.querySelector(
+          `[data-x="${i}"][data-y="${j}"]`,
+        );
+        cell.classList.add('ship');
       }
     }
   }
@@ -76,6 +85,19 @@ function bindAttackListener(handlerFunction) {
   });
 }
 
+function bindPlacementListener(handlerFunction) {
+  playerBoardElem.addEventListener('click', (event) => {
+    if (!event.target.classList.contains('cell')) {
+      return;
+    }
+
+    const X = parseInt(event.target.dataset.x, 10);
+    const Y = parseInt(event.target.dataset.y, 10);
+
+    handlerFunction(X, Y);
+  });
+}
+
 function viewPlayerTurn(player) {
   playerTurnElem.textContent = `It's ${player.name}'s turn!`;
 }
@@ -90,4 +112,5 @@ export {
   UpdateCells,
   viewPlayerTurn,
   viewEndgame,
+  bindPlacementListener,
 };
